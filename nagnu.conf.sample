@@ -1,0 +1,11 @@
+# Address of Nagios or Icinga CGI
+uri https://example.com
+
+# nagios or icinga
+servertype fooBar
+
+# Username
+username foo
+
+# Password
+password bar
