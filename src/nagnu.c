@@ -7,7 +7,7 @@
 #include <regex.h>
 #include <unistd.h>
 #include "nagnu.h"
-#include "getopt.c"
+#include "getconf.c"
 
 
 #define MAX_BUF 1755360
@@ -21,7 +21,7 @@ char *match;
 int main()
 {
 
-  getOpt();
+  getConf();
   return 0;
 
   printf("\n");
