@@ -3,9 +3,9 @@
 #include "nagnu.h"
 
 char *fileName = "nagnu.conf";
-char server_address[256];
 char user[256];
 char passwd[256];
+char server_address[256];
 char user_pwd[256];
 
 int getConf()
@@ -135,6 +135,7 @@ int readConf(char path[])
 
   }
   fclose(fp);
+  strcat(server_address, "/cgi-bin/status.cgi?host=all");
   strcpy(user_pwd, user);
   strcat(user_pwd,":");
   strcat(user_pwd, passwd);

@@ -7,3 +7,5 @@ char *match_string(char line[], int type);
 int service_problems();
 int lookForConf(char path[]);
 int readConf(char confPath[]);
+extern char server_address[256];
+extern char user_pwd[256];

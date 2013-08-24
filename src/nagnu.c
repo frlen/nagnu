@@ -23,7 +23,6 @@ int main()
 {
 
   getConf();
-  return 0;
 
   printf("\n");
   get_data();
@@ -57,7 +56,7 @@ int get_data()
   CURLcode curl_res;
   curl = curl_easy_init();
   char host[5] = "FALSE";
-  
+ 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
