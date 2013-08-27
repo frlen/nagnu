@@ -7,8 +7,9 @@
 #include <curl/curl.h>
 #include <regex.h>
 #include <unistd.h>
-#include "nagnu.h"
+#include <curses.h>
 #include "getconf.c"
+#include "nagnu.h"
 
 
 #define MAX_BUF 1755360
@@ -17,16 +18,50 @@
 char wr_buf[MAX_BUF+2];
 int wr_index;
 char *match;
+int ypos = 0;
+int xpos = 0;
+int resetVars = 0;
+int firstRun = 0;
+int lastType = 0;
 
 
 int main()
 {
 
-  getConf();
+  initscr();
+  while (true)
+  {
+    wr_index = 0;
+    clear();
+    if(has_colors() == FALSE)
+    { endwin();
+      printf("Your terminal does not support color\n");
+      return 1;
+    }
+    start_color();
 
-  printf("\n");
-  get_data();
+    init_pair(1, COLOR_BLACK, COLOR_GREEN);     // OK
+    init_pair(2, COLOR_BLACK, COLOR_YELLOW);    // WARNING
+    init_pair(3, COLOR_BLACK, COLOR_RED);       // CRITICAL
+    init_pair(4, COLOR_BLACK, 5);   // UNKNOWN */
 
+    if (firstRun == 0)
+    {
+      getConf();
+    }
+
+    get_data();
+    refresh();
+
+    resetVars = 1;
+
+    firstRun = 1;
+
+    sleep(5);
+
+  }
+
+  endwin();
   return 0;
 }
 
@@ -113,16 +148,16 @@ int service_problems() {
 
 
 
-void sort_data(char host[]) {
+void sort_data(char hostar[]) {
  
   char statushostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
   char statusEven[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
   char statusOdd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
-  char *hostname = malloc(sizeof(char) * 50);
-  char *servicename = malloc(sizeof(char) * 100);
   char statuswarning[] = "statusBGWARNING'";
   char statuscritical[] = "statusBGCRITICAL'";
   char statusunknown[] = "statusBGUNKNOWN'";
+  char *hostname = malloc(sizeof(char) * 50);
+  char *servicename = malloc(sizeof(char) * 100);
   char hostLine[2500];
   char serviceLine[2500 + 1];
   int  hostCounter = 0;
@@ -161,7 +196,7 @@ void sort_data(char host[]) {
                     if(printHost == 0) {
                       type = 0;
                       print_object(hostname, hostState, type);
-                      printf("\n");
+                      //printf("\n");
                       printHost = 1;
                     }
                     type = 1;
@@ -177,7 +212,7 @@ void sort_data(char host[]) {
                     }
                     servicename = match_string(serviceLine, type);
                     print_object(serviceStateName, serviceState, type);
-                    printf(" %s\n", servicename);
+                    printw(" %s\n", servicename);
                   }
                 }
                 serviceCounter = 0; 
@@ -188,7 +223,7 @@ void sort_data(char host[]) {
             }
           }
           if(printHost == 1) {
-            printf("\n");
+            //printf("\n");
           }
           printHost = 0;
 
@@ -199,10 +234,11 @@ void sort_data(char host[]) {
     } else if (wr_buf[i] == '\0') {
       free(servicename);
       free(hostname);
+
       break;
     }
   }
-
+  
   return;
 }
 
@@ -256,11 +292,12 @@ char * match_string(char line[], int type)
 int print_object(char *object, int state, int type)
 {
 
-  if(type == 1) {
-    printf("  ");
-  }
 
-  if(state == 0) {
+  /*if(type == 1) {
+    printf("  ");
+  }*/
+
+  /*if(state == 0) {
     printf("\033[42m");
   } else if(state == 1) {
     printf("\033[43m");
@@ -269,9 +306,41 @@ int print_object(char *object, int state, int type)
   } else if(state == 3) {
     printf("\033[45m");
   }
-  printf(" %s \033[0m", object);
+  printf(" %s \033[0m", object);*/
+
+  if (resetVars == 1)
+  {
+    xpos = 0;
+    ypos = 0;
+    resetVars = 0;
+  }
+ 
+  ++state; 
+  if (LINES <= ypos)
+  {
+    xpos = xpos+50;
+    ypos = 0;
+  }
+
+  attron(COLOR_PAIR(state)); 
+  if (type == 1)
+  {
+    ++ypos;
+    if (lastType == 1)
+    {
+      --ypos;
+    }
+    mvprintw(ypos-1, xpos+2, " %s ", object);
+    attroff(COLOR_PAIR(state));
+    lastType = 1;
+  } else {
+    mvprintw(ypos, xpos, " %s ", object);
+    attroff(COLOR_PAIR(state));
+    lastType = 0;
+  }
+  attroff(COLOR_PAIR(state));
+  ++ypos;
   free(match);
+  //refresh();
   return 0;
 }
-
-

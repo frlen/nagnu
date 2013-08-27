@@ -1,5 +1,6 @@
 int get_data();
-void sort_data(char host[]);
+//void sort_data(char host[]);
+void sort_data();
 int state_color();
 int print_object(char match[], int state, int type);
 size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);
@@ -9,3 +10,5 @@ int lookForConf(char path[]);
 int readConf(char confPath[]);
 extern char server_address[256];
 extern char user_pwd[256];
+extern int resetVars;
+extern int lastType;

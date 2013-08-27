@@ -1,6 +1,6 @@
 CC=clang
 
-CFLAGS=-Wall -g /usr/lib/libcurl.dylib
+CFLAGS=-Wall /usr/lib/libcurl.dylib /usr/lib/libncurses.dylib
 
 all: nagnu
 
