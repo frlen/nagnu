@@ -39,6 +39,7 @@ int main()
       return 1;
     }
     start_color();
+    curs_set(0);
 
     init_pair(1, COLOR_BLACK, COLOR_GREEN);     // OK
     init_pair(2, COLOR_BLACK, COLOR_YELLOW);    // WARNING
@@ -146,8 +147,21 @@ int service_problems() {
   return 0;
 }
 
+/*int is_disabled(char hits[250], char servicename[250]) {
+  int isDisabled = 0;
+  int service;
+  int serviceCounter = 0;
 
+  for(service = 0; service <= (size_t)wr_buf; ++service) {
+    serviceLine[serviceCounter] = wr_buf[service];
+    ++serviceCounter;
+    if(wr_buf[service] == '\n') {
+ 
+      
 
+  return isDisabled;
+}
+*/
 void sort_data(char hostar[]) {
  
   char statushostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
@@ -168,8 +182,10 @@ void sort_data(char hostar[]) {
   int  type;
   char hits[250];
   char serviceStateName[20];
+  size_t i;
+  int service;
   
-  for(size_t i=0; i <= (size_t)wr_buf; ++i) {
+  for(i=0; i <= (size_t)wr_buf; ++i) {
     hostState = 0;
     hostLine[hostCounter] = wr_buf[i];
     ++hostCounter;
@@ -185,7 +201,7 @@ void sort_data(char hostar[]) {
           }
           
           if(hostState < 1) {
-            for(int service = 0; service <= (size_t)wr_buf; ++service) {
+            for(service = 0; service <= (size_t)wr_buf; ++service) {
               serviceLine[serviceCounter] = wr_buf[service];
               ++serviceCounter;
               if(wr_buf[service] == '\n') {
@@ -211,8 +227,12 @@ void sort_data(char hostar[]) {
                       strcpy(serviceStateName, "UNKNOWN");
                     }
                     servicename = match_string(serviceLine, type);
-                    print_object(serviceStateName, serviceState, type);
-                    printw(" %s\n", servicename);
+                    //if(is_disabled(hits, servicename) == 0) {
+                      print_object(serviceStateName, serviceState, type);
+                      attron(A_BOLD);
+                      printw(" %s\n", servicename);
+                      attroff(A_BOLD);
+                    //}
                   }
                 }
                 serviceCounter = 0; 
@@ -241,10 +261,6 @@ void sort_data(char hostar[]) {
   
   return;
 }
-
-
-
-
 
 
 char * match_string(char line[], int type)
@@ -281,12 +297,6 @@ char * match_string(char line[], int type)
   return match;
 
 }
-
-
-
-
-
-
 
 
 int print_object(char *object, int state, int type)

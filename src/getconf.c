@@ -17,8 +17,9 @@ int getConf()
   possiblePaths[0] = "./";
   possiblePaths[1] = "/etc/";
   possiblePaths[2] = "/usr/local/etc/";
+  int i;
 
-  for (int i = 0; i < 3; i++)
+  for (i = 0; i < 3; i++)
   {
     state = lookForConf(possiblePaths[i]);
     if (state == 0)
@@ -38,15 +39,16 @@ int getConf()
 
 int readConf(char path[])
 {
-
   char c[256];
+  memset(c, '\0', sizeof(c));
   int skipLine = 0;
   char storeInput[256];
-  const char *uri = "uri";
-  const char *username = "username";
-  const char *password = "password";
+  memset(storeInput, '\0', sizeof(storeInput));
+  const char *server = "server:";
+  const char *username = "username:";
+  const char *password = "password:";
   int i = 0;
-  int isUri = 0, isUsername = 0, isPassword = 0;
+  int isServer = 0, isUsername = 0, isPassword = 0;
 
   FILE *fp;
   fp = fopen(path, "r");
@@ -69,7 +71,6 @@ int readConf(char path[])
       skipLine = 1;
       continue;
     } 
-
     if (strcmp(c, " "))
     {
       if (strcmp(c, "\n"))
@@ -77,17 +78,16 @@ int readConf(char path[])
         storeInput[i] = *c;
         i++;
       } else {
-        if (isUri == 1)
+        if (isServer == 1)
         {
           strcpy(server_address, storeInput);
           memset(storeInput, '\0', sizeof(storeInput));
           i = 0;
-          isUri = 0;
+          isServer = 0;
         }
         
         if (isUsername == 1)
         {
-          //user = storeInput;
           strcpy(user, storeInput);
           memset(storeInput, '\0', sizeof(storeInput));
           i = 0;
@@ -108,10 +108,10 @@ int readConf(char path[])
   
     if (!strcmp(c, " ")) 
     {
-      if (!strcmp(storeInput,uri))
+      if (!strcmp(storeInput,server))
       {
         i = 0;
-        isUri = 1;
+        isServer = 1;
         memset(storeInput, '\0', sizeof(storeInput));
         continue;
       }
@@ -140,6 +140,9 @@ int readConf(char path[])
   strcpy(user_pwd, user);
   strcat(user_pwd,":");
   strcat(user_pwd, passwd);
+  printf("Server address: %s\n", server_address);
+  printf("Username:Password: %s\n", user_pwd);
+
 
   return 0;
 
