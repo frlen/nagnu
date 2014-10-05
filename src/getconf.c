@@ -23,7 +23,7 @@ int get_conf()
       break;
 
     } else {
-      printf("Can't find nagnu.conf!");
+      printf("Can't find nagnu.conf!\n");
       exit(2);
     }
   }
