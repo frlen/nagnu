@@ -21,8 +21,6 @@ void count_strings()
             }
         }
         fclose(fp);
-    } else {
-        printf("couldn\'t open file: excludes");
     }
 }
 
