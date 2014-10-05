@@ -30,24 +30,6 @@ char **excludes_save;
 
 int main()
 {
-  initscr();
-  while (true)
-  {
-    wr_index = 0;
-    clear();
-    if(has_colors() == FALSE)
-    { endwin();
-      printf("Your terminal does not support color\n");
-      return 1;
-    }
-    start_color();
-    curs_set(0);
-
-    init_pair(1, COLOR_BLACK, COLOR_GREEN);   // OK
-    init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
-    init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
-    init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
-
     if (first_run == 0)
     {
         get_conf();
@@ -60,18 +42,36 @@ int main()
         get_excludes();
     }
 
-    get_data();
-    refresh();
+    initscr();
+    while (true)
+    {
+        wr_index = 0;
+        clear();
+        if(has_colors() == FALSE)
+        { 
+            endwin();
+            printf("Your terminal does not support color\n");
+            return 1;
+        }
+        start_color();
+        curs_set(0);
 
-    reset_vars = 1;
-    first_run = 1;
+        init_pair(1, COLOR_BLACK, COLOR_GREEN);   // OK
+        init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
+        init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
+        init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
 
-    sleep(5);
+        get_data();
+        refresh();
 
-  }
+        reset_vars = 1;
+        first_run = 1;
 
-  endwin();
-  return 0;
+        sleep(5);
+    }
+
+    endwin();
+    return 0;
 }
 
 size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)

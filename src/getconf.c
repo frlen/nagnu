@@ -21,6 +21,10 @@ int get_conf()
       strcpy(conf_path,possible_paths[i]);
       strcat(conf_path,file_name);
       break;
+
+    } else {
+      printf("Can't find nagnu.conf!");
+      exit(2);
     }
   }
 
