@@ -1,4 +1,3 @@
-//em0 test
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -8,9 +7,9 @@
 #include <regex.h>
 #include <unistd.h>
 #include <curses.h>
-#include "getconf.c"
 #include "nagnu.h"
-
+#include "getconf.c"
+#include "excludes.c"
 
 #define MAX_BUF 1755360
 #define MAXLINE 1000
@@ -20,14 +19,17 @@ int wr_index;
 char *match;
 int ypos = 0;
 int xpos = 0;
-int resetVars = 0;
-int firstRun = 0;
-int lastType = 0;
-
+int reset_vars = 0;
+int first_run = 0;
+int last_type = 0;
+char *path = "excludes";
+int num_strings = 0;
+int longest_string = 0;
+char **get_excludes();
+char **excludes_save;
 
 int main()
 {
-
   initscr();
   while (true)
   {
@@ -41,22 +43,28 @@ int main()
     start_color();
     curs_set(0);
 
-    init_pair(1, COLOR_BLACK, COLOR_GREEN);     // OK
-    init_pair(2, COLOR_BLACK, COLOR_YELLOW);    // WARNING
-    init_pair(3, COLOR_BLACK, COLOR_RED);       // CRITICAL
-    init_pair(4, COLOR_BLACK, 5);   // UNKNOWN */
+    init_pair(1, COLOR_BLACK, COLOR_GREEN);   // OK
+    init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
+    init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
+    init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
 
-    if (firstRun == 0)
+    if (first_run == 0)
     {
-      getConf();
+        get_conf();
+        count_strings();
+        excludes_save = malloc(num_strings * sizeof(char *));
+        for (int i = 0; i < num_strings; i++)
+        {
+            excludes_save[i] = malloc((longest_string+1) * sizeof(char));
+        }
+        get_excludes();
     }
 
     get_data();
     refresh();
 
-    resetVars = 1;
-
-    firstRun = 1;
+    reset_vars = 1;
+    first_run = 1;
 
     sleep(5);
 
@@ -65,7 +73,6 @@ int main()
   endwin();
   return 0;
 }
-
 
 size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -76,15 +83,12 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
     return 0;
   }
 
-  *memcpy( (void *)&wr_buf[wr_index], ptr, (size_t)segsize );
+  (void) *memcpy( (void *)&wr_buf[wr_index], ptr, (size_t)segsize );
   wr_index += segsize;
   wr_buf[wr_index] = 0;
 
   return segsize;
 }
-
-
-
 
 int get_data()
 {
@@ -92,7 +96,7 @@ int get_data()
   CURLcode curl_res;
   curl = curl_easy_init();
   char host[5] = "FALSE";
- 
+
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
@@ -110,12 +114,12 @@ int get_data()
     }
 
   }
-  
+
   return 0;
 }
 
-int service_problems() {
-
+int service_problems() 
+{
   char  line[2500];
   int   counter = 0;
   int   errorsCounter = 0;
@@ -125,14 +129,13 @@ int service_problems() {
   char  errorss[5000][500];
   int   i = 0;
 
-
   while(wr_buf != '\0') {
     line[counter] = wr_buf[i];
     ++i;
     ++counter;
     if(wr_buf[i] == '\n') {
 
-      if((strcasestr(line, statuswarning) || strcasestr(line, statuscritical) || strcasestr(line, statusunknown)) && !strcasestr(line, "#comments")) {
+      if((strstr(line, statuswarning) || strstr(line, statuscritical)	|| strstr(line, statusunknown)) && !strstr(line, "#comments")) {
         strcpy(errorss[errorsCounter], line);
         ++errorsCounter;
       }
@@ -147,23 +150,8 @@ int service_problems() {
   return 0;
 }
 
-/*int is_disabled(char hits[250], char servicename[250]) {
-  int isDisabled = 0;
-  int service;
-  int serviceCounter = 0;
-
-  for(service = 0; service <= (size_t)wr_buf; ++service) {
-    serviceLine[serviceCounter] = wr_buf[service];
-    ++serviceCounter;
-    if(wr_buf[service] == '\n') {
- 
-      
-
-  return isDisabled;
-}
-*/
-void sort_data(char hostar[]) {
- 
+void sort_data(char hostar[]) 
+{
   char statushostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
   char statusEven[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
   char statusOdd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
@@ -182,73 +170,100 @@ void sort_data(char hostar[]) {
   int  type;
   char hits[250];
   char serviceStateName[20];
-  size_t i;
-  int service;
-  
-  for(i=0; i <= (size_t)wr_buf; ++i) {
-    hostState = 0;
-    hostLine[hostCounter] = wr_buf[i];
-    ++hostCounter;
-    if(wr_buf[i] == '\n') {
+  int exclude_counter = 0;
+  int is_exclude = 0;
 
-        if(strcasestr(hostLine, statushostdown) || strcasestr(hostLine, statusEven) || strcasestr(hostLine, statusOdd)) {
+  for(size_t i=0; i <= (size_t)wr_buf; ++i) 
+  {
+    if(wr_buf[i] == '\0')
+    {
+        break;
+    }
+    hostState = 0;
+    if(wr_buf[i] == '\n') 
+    {
+        if(strstr(hostLine, statushostdown) || strstr(hostLine, statusEven) || strstr(hostLine, statusOdd)) 
+        {
           type = 0;
           hostname = match_string(hostLine, type);
-          if(strcasestr(hostLine, statushostdown)) {
+          if(strstr(hostLine, statushostdown)) 
+          {
             hostState = 2;
             print_object(hostname, hostState, type);
             printf("\n\n");
           }
-          
-          if(hostState < 1) {
-            for(service = 0; service <= (size_t)wr_buf; ++service) {
+
+          if(hostState < 1) 
+          {
+            for(int service = 0; service <= (size_t)wr_buf; ++service) 
+            {
               serviceLine[serviceCounter] = wr_buf[service];
               ++serviceCounter;
-              if(wr_buf[service] == '\n') {
-  
+              if(wr_buf[service] == '\n') 
+              {
+
                 sprintf(hits, "extinfo.cgi?type=2&host=%s&service=", hostname);
-                if(strcasestr(serviceLine, hits)) {
-                  if((strcasestr(serviceLine, statuswarning) || strcasestr(serviceLine, statuscritical) || strcasestr(serviceLine, statusunknown)) && !strcasestr(serviceLine, "#comments")) {
-                    if(printHost == 0) {
+                if(strstr(serviceLine, hits)) 
+                {
+                  
+                  if((strstr(serviceLine, statuswarning) || strstr(serviceLine, statuscritical) || strstr(serviceLine, statusunknown)) && !strstr(serviceLine, "#comments")) 
+                  {
+                    type = 1;
+                    servicename = match_string(serviceLine, type);
+                    exclude_counter = 0;
+                    while(exclude_counter < num_strings) 
+                    {
+                      if(strstr(servicename, excludes_save[exclude_counter])) 
+                      {
+                        is_exclude = 1;
+                        break;
+                      }
+                      ++exclude_counter;
+                    }
+                    if(is_exclude == 1) 
+                    {
+                      is_exclude = 0;
+                      printHost = 0;
+                      serviceCounter = 0;
+                      memset( serviceLine, '\0', sizeof(serviceLine));
+                      continue;
+                    }
+
+                    if(printHost == 0) 
+                    {
                       type = 0;
                       print_object(hostname, hostState, type);
-                      //printf("\n");
                       printHost = 1;
                     }
                     type = 1;
-                    if(strcasestr(serviceLine, statuswarning)) {
+                    if(strstr(serviceLine, statuswarning)) {
                       serviceState = 1;
                       strcpy(serviceStateName, "WARNING");
-                    } else if(strcasestr(serviceLine, statuscritical)) {
+                    } else if(strstr(serviceLine, statuscritical)) {
                       serviceState = 2;
                       strcpy(serviceStateName, "CRITICAL");
-                    } else if(strcasestr(serviceLine, statusunknown)) {
+                    } else if(strstr(serviceLine, statusunknown)) {
                       serviceState = 3;
                       strcpy(serviceStateName, "UNKNOWN");
                     }
-                    servicename = match_string(serviceLine, type);
-                    //if(is_disabled(hits, servicename) == 0) {
-                      print_object(serviceStateName, serviceState, type);
-                      attron(A_BOLD);
-                      printw(" %s\n", servicename);
-                      attroff(A_BOLD);
-                    //}
+
+                    print_object(serviceStateName, serviceState, type);
+                    attron(A_BOLD);
+                    printw(" %s\n", servicename);
+                    attroff(A_BOLD);
                   }
                 }
-                serviceCounter = 0; 
+                serviceCounter = 0;
                 memset( serviceLine, '\0', sizeof(serviceLine) );
               } else if(wr_buf[service] == '\0') {
                 break;
               }
             }
           }
-          if(printHost == 1) {
-            //printf("\n");
-          }
           printHost = 0;
 
         }
-      
+
       hostCounter = 0;
       memset( hostLine, '\0', sizeof(hostLine) );
     } else if (wr_buf[i] == '\0') {
@@ -257,11 +272,13 @@ void sort_data(char hostar[]) {
 
       break;
     }
+    hostLine[hostCounter] = wr_buf[i];
+    ++hostCounter;
+
   }
-  
+
   return;
 }
-
 
 char * match_string(char line[], int type)
 {
@@ -280,7 +297,7 @@ char * match_string(char line[], int type)
   char *match = malloc(sizeof(char) * 100);
 
   typeregex = regcomp(&regex, *pattern, 0);
-  if( typeregex ) { 
+  if( typeregex ) {
     fprintf(stderr, "Could not compile regex\n");
     exit(1);
    }
@@ -295,62 +312,42 @@ char * match_string(char line[], int type)
   }
 
   return match;
-
 }
-
 
 int print_object(char *object, int state, int type)
 {
-
-
-  /*if(type == 1) {
-    printf("  ");
-  }*/
-
-  /*if(state == 0) {
-    printf("\033[42m");
-  } else if(state == 1) {
-    printf("\033[43m");
-  } else if(state == 2) {
-    printf("\033[41m");
-  } else if(state == 3) {
-    printf("\033[45m");
-  }
-  printf(" %s \033[0m", object);*/
-
-  if (resetVars == 1)
+  if (reset_vars == 1)
   {
     xpos = 0;
     ypos = 0;
-    resetVars = 0;
+    reset_vars = 0;
   }
- 
-  ++state; 
+
+  ++state;
   if (LINES <= ypos)
   {
     xpos = xpos+50;
     ypos = 0;
   }
 
-  attron(COLOR_PAIR(state)); 
+  attron(COLOR_PAIR(state));
   if (type == 1)
   {
     ++ypos;
-    if (lastType == 1)
+    if (last_type == 1)
     {
       --ypos;
     }
     mvprintw(ypos-1, xpos+2, " %s ", object);
     attroff(COLOR_PAIR(state));
-    lastType = 1;
+    last_type = 1;
   } else {
     mvprintw(ypos, xpos, " %s ", object);
     attroff(COLOR_PAIR(state));
-    lastType = 0;
+    last_type = 0;
   }
   attroff(COLOR_PAIR(state));
   ++ypos;
   free(match);
-  //refresh();
   return 0;
 }

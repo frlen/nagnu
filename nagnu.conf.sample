@@ -1,8 +1,8 @@
 # Address of Nagios or Icinga CGI
-server: https://example.com/nagios
+uri https://example.com/nagios
 
 # Username
-username: foo
+username foo
 
 # Password
-password: bar
+password bar

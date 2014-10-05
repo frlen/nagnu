@@ -1,169 +1,153 @@
-#include <stdio.h>
-#include <string.h>
-#include <curses.h>
-#include "nagnu.h"
-
-char *fileName = "nagnu.conf";
+char *file_name = "nagnu.conf";
 char user[256];
 char passwd[256];
 char server_address[256];
 char user_pwd[256];
 
-int getConf()
+int get_conf()
 {
   int state;
-  char confPath[256];
-  char *possiblePaths[3];
-  possiblePaths[0] = "./";
-  possiblePaths[1] = "/etc/";
-  possiblePaths[2] = "/usr/local/etc/";
-  int i;
+  char conf_path[256];
+  char *possible_paths[3];
+  possible_paths[0] = "./";
+  possible_paths[1] = "/etc/";
+  possible_paths[2] = "/usr/local/etc/";
 
-  for (i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
   {
-    state = lookForConf(possiblePaths[i]);
+    state = look_for_conf(possible_paths[i]);
     if (state == 0)
     {
-      strcpy(confPath,possiblePaths[i]);
-      strcat(confPath,fileName);
+      strcpy(conf_path,possible_paths[i]);
+      strcat(conf_path,file_name);
       break;
     }
   }
 
-  readConf(confPath);
+  read_conf(conf_path);
 
 
   return 0;
 
 }
 
-int readConf(char path[])
+int read_conf(char path[])
 {
-  char c[256];
-  memset(c, '\0', sizeof(c));
-  int skipLine = 0;
-  char storeInput[256];
-  memset(storeInput, '\0', sizeof(storeInput));
-  const char *server = "server:";
-  const char *username = "username:";
-  const char *password = "password:";
+  char c[512];
+	memset(c, '\0', sizeof(c));
+  int skip_line = 0;
+  char store_input[256];
+  const char *server = "server";
+  const char *username = "username";
+  const char *password = "password";
   int i = 0;
-  int isServer = 0, isUsername = 0, isPassword = 0;
+  int is_server = 0, is_username = 0, is_password = 0;
 
   FILE *fp;
   fp = fopen(path, "r");
 
   while ((*c = getc(fp)) != EOF) 
   {
-
-    if (skipLine == 1 && !strcmp(c, "\n"))
+    if (skip_line == 1 && !strcmp(c, "\n"))
     {
-      skipLine = 0;
+      skip_line = 0;
     }
 
-    if (skipLine == 1)
+    if (skip_line == 1)
     {
       continue;
     }
 
     if (!strcmp(c, "#"))
     {
-      skipLine = 1;
+      skip_line = 1;
       continue;
     } 
+
     if (strcmp(c, " "))
     {
       if (strcmp(c, "\n"))
       {
-        storeInput[i] = *c;
+        store_input[i] = *c;
         i++;
       } else {
-        if (isServer == 1)
+        if (is_server == 1)
         {
-          strcpy(server_address, storeInput);
-          memset(storeInput, '\0', sizeof(storeInput));
+          strcpy(server_address, store_input);
+          memset(store_input, '\0', sizeof(store_input));
           i = 0;
-          isServer = 0;
+          is_server = 0;
         }
         
-        if (isUsername == 1)
+        if (is_username == 1)
         {
-          strcpy(user, storeInput);
-          memset(storeInput, '\0', sizeof(storeInput));
+          strcpy(user, store_input);
+          memset(store_input, '\0', sizeof(store_input));
           i = 0;
-          isUsername = 0;
+          is_username = 0;
         }
         
-        if (isPassword == 1)
+        if (is_password == 1)
         {
-          strcpy(passwd, storeInput);
-          memset(storeInput, '\0', sizeof(storeInput));
+          strcpy(passwd, store_input);
+          memset(store_input, '\0', sizeof(store_input));
           i = 0;
-          isPassword = 0;
+          is_password = 0;
         }
-        
       }
-
     }
   
     if (!strcmp(c, " ")) 
     {
-      if (!strcmp(storeInput,server))
+      if (!strcmp(store_input,server))
       {
         i = 0;
-        isServer = 1;
-        memset(storeInput, '\0', sizeof(storeInput));
+        is_server = 1;
+        memset(store_input, '\0', sizeof(store_input));
         continue;
       }
 
-      if (!strcmp(storeInput,username))
+      if (!strcmp(store_input,username))
       {
         i = 0;
-        isUsername = 1;
-        memset(storeInput, '\0', sizeof(storeInput));
+        is_username = 1;
+        memset(store_input, '\0', sizeof(store_input));
         continue;
       }
 
-      if (!strcmp(storeInput,password))
+      if (!strcmp(store_input,password))
       {
         i = 0;
-        isPassword = 1;
-        memset(storeInput, '\0', sizeof(storeInput));
+        is_password = 1;
+        memset(store_input, '\0', sizeof(store_input));
         continue;
       }
-
     }
-
   }
+
   fclose(fp);
-  strcat(server_address, "/cgi-bin/status.cgi?host=all");
+  strcat(server_address, "/cgi-bin/status.cgi?host=all&limit=0");
   strcpy(user_pwd, user);
   strcat(user_pwd,":");
   strcat(user_pwd, passwd);
-  printf("Server address: %s\n", server_address);
-  printf("Username:Password: %s\n", user_pwd);
-
 
   return 0;
 
 }
 
-int lookForConf(char path[])
+int look_for_conf(char path[])
 {
-  char fullPath[256];
+  char full_path[256];
 
-  strcpy(fullPath,path);
-  strcat(fullPath,fileName);
+  strcpy(full_path,path);
+  strcat(full_path,file_name);
 
   FILE *fp;
-  if (!(fp = fopen(fullPath, "r")))
+  if (!(fp = fopen(full_path, "r")))
   {
-    printf("Can't find config file.");
     return 1;
   } else {
     fclose(fp);
     return 0;
   }
-  
-
 }
