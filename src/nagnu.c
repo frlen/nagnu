@@ -67,7 +67,7 @@ int main()
         reset_vars = 1;
         first_run = 1;
 
-        sleep(5);
+        sleep(10);
     }
 
     endwin();
@@ -135,7 +135,7 @@ int service_problems()
     ++counter;
     if(wr_buf[i] == '\n') {
 
-      if((strstr(line, statuswarning) || strstr(line, statuscritical)	|| strstr(line, statusunknown)) && !strstr(line, "#comments")) {
+      if((strcasestr(line, statuswarning) || strcasestr(line, statuscritical)	|| strcasestr(line, statusunknown)) && !strcasestr(line, "#comments")) {
         strcpy(errorss[errorsCounter], line);
         ++errorsCounter;
       }
@@ -182,17 +182,17 @@ void sort_data(char hostar[])
     hostState = 0;
     if(wr_buf[i] == '\n') 
     {
-        if(strstr(hostLine, statushostdown) || strstr(hostLine, statusEven) || strstr(hostLine, statusOdd)) 
+        if(strcasestr(hostLine, statushostdown) || strcasestr(hostLine, statusEven) || strcasestr(hostLine, statusOdd)) 
         {
           type = 0;
           hostname = match_string(hostLine, type);
-          if(strstr(hostLine, statushostdown)) 
+          if(strcasestr(hostLine, statushostdown)) 
           {
             hostState = 2;
             print_object(hostname, hostState, type);
             printf("\n\n");
           }
-
+          
           if(hostState < 1) 
           {
             for(int service = 0; service <= (size_t)wr_buf; ++service) 
@@ -203,17 +203,17 @@ void sort_data(char hostar[])
               {
 
                 sprintf(hits, "extinfo.cgi?type=2&host=%s&service=", hostname);
-                if(strstr(serviceLine, hits)) 
+                if(strcasestr(serviceLine, hits)) 
                 {
                   
-                  if((strstr(serviceLine, statuswarning) || strstr(serviceLine, statuscritical) || strstr(serviceLine, statusunknown)) && !strstr(serviceLine, "#comments")) 
+                  if((strcasestr(serviceLine, statuswarning) || strcasestr(serviceLine, statuscritical) || strcasestr(serviceLine, statusunknown)) && !strcasestr(serviceLine, "#comments")) 
                   {
                     type = 1;
                     servicename = match_string(serviceLine, type);
                     exclude_counter = 0;
                     while(exclude_counter < num_strings) 
                     {
-                      if(strstr(servicename, excludes_save[exclude_counter])) 
+                      if(strcasestr(servicename, excludes_save[exclude_counter])) 
                       {
                         is_exclude = 1;
                         break;
@@ -236,13 +236,13 @@ void sort_data(char hostar[])
                       printHost = 1;
                     }
                     type = 1;
-                    if(strstr(serviceLine, statuswarning)) {
+                    if(strcasestr(serviceLine, statuswarning)) {
                       serviceState = 1;
                       strcpy(serviceStateName, "WARNING");
-                    } else if(strstr(serviceLine, statuscritical)) {
+                    } else if(strcasestr(serviceLine, statuscritical)) {
                       serviceState = 2;
                       strcpy(serviceStateName, "CRITICAL");
-                    } else if(strstr(serviceLine, statusunknown)) {
+                    } else if(strcasestr(serviceLine, statusunknown)) {
                       serviceState = 3;
                       strcpy(serviceStateName, "UNKNOWN");
                     }
@@ -292,7 +292,11 @@ char * match_string(char line[], int type)
     *pattern = ".*host=\\(.*\\)' ";
   } else {
     nmatch = 8;
-    *pattern = "<TD ALIGN=LEFT valign=center CLASS='\\(.*\\)'><A HREF='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</A></TD>";
+
+    /* Switch the pattern rows below for nagios 3.5 or later */
+
+    *pattern = "<TD ALIGN=LEFT valign=center CLASS='\\(.*\\)'><A HREF='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</A></TD>"; /* Nagios < 3.5 */
+    //*pattern = "<td align='left' valign=center class='\\(.*\\)'><a href='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</a></td></tr>"; /* Nagios >= 3.5 */
   }
   char *match = malloc(sizeof(char) * 100);
 
@@ -309,6 +313,8 @@ char * match_string(char line[], int type)
       sprintf(match, "%.*s", (int)(pmatch[4].rm_eo - pmatch[4].rm_so), &line[pmatch[4].rm_so]);
     }
     regfree(&regex);
+  } else {
+    printf("No match!");
   }
 
   return match;
