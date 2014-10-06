@@ -10,6 +10,7 @@
 #include "nagnu.h"
 #include "getconf.c"
 #include "excludes.c"
+#include "arguments.c"
 
 #define MAX_BUF 1755360
 #define MAXLINE 1000
@@ -27,11 +28,13 @@ int num_strings = 0;
 int longest_string = 0;
 char **get_excludes();
 char **excludes_save;
+extern char *cvalue;
 
-int main()
+int main(int argc, char **argv)
 {
     if (first_run == 0)
     {
+        get_arguments(argc, argv);
         get_conf();
         count_strings();
         excludes_save = malloc(num_strings * sizeof(char *));
