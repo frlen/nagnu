@@ -1,8 +1,10 @@
+extern char *evalue;
+
 void count_strings()
 {
     int string_length = 0;
     char c[512];
-    FILE *fp = fopen("excludes", "r");
+    FILE *fp = fopen(evalue, "r");
 
     if(fp)
     {
@@ -28,7 +30,7 @@ char **get_excludes()
 {
     int i = 0;
     char c[1080];
-    FILE *fp = fopen("excludes", "r");
+    FILE *fp = fopen(evalue, "r");
     char store_input[512];
     int num_strings_cpy = num_strings-1;
     memset(store_input, '\0', sizeof(store_input));
