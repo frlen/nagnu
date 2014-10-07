@@ -3,14 +3,56 @@
 OS=`uname -s`
 
 if [ "$OS" == "Darwin" ]; then
+  if [ -f /usr/lib/libcurl.dylib ]; then
+    echo "Found libcurl"
+  else
+    no_libcurl="true"
+  fi
+  if [ -f /usr/lib/libncurses.dylib ]; then
+    echo "Found libncurses"
+  else
+    no_libncurses="true"
+  fi
   CC=clang
-  CFLAGS="-Wall /usr/lib/libcurl.dylib /usr/lib/libncurses.dylib -g -std=c99"
-elif [ "$OS" == "FreeBSD" ] || [ "$OS" == "OpenBSD" ] || [ "$OS" == "NetBSD" ]; then
+  CFLAGS="/usr/lib/libcurl.dylib /usr/lib/libncurses.dylib -std=c99"
+
+elif [ "$OS" == "FreeBSD" ]; then
+  if [ -f /usr/local/lib/libcurl.so ]; then
+    echo "Found libcurl"
+  else
+    no_libcurl="true"
+  fi
+  if [ -f /usr/lib/libncurses.so ]; then
+    echo "Found libncurses"
+  else
+    no_libncurses="true"
+  fi
   CC=clang
-  CFLAGS="-Wall /usr/local/lib/libcurl.so /usr/lib/libncurses.so -g -std=c99 -I/usr/local/include"
+  CFLAGS="/usr/local/lib/libcurl.so /usr/lib/libncurses.so -std=c99 -I/usr/local/include"
+
 elif [ "$OS" == "Linux" ]; then
+  if [ -f /usr/lib/libcurl.so ]; then
+    echo "Found libcurl"
+  else
+    no_libcurl="true"
+  fi
+  if [ -f /usr/lib/libncurses.so ]; then
+    echo "Found libncurses"
+  else
+    no_libncurses="true"
+  fi
   CC=gcc
-  CFLAGS="-Wall /usr/lib/libcurl.so /usr/lib/libncurses.so -g -std=c99"
+  CFLAGS="/usr/lib/libcurl.so /usr/lib/libncurses.so -std=c99"
+fi
+
+if [ "$no_libcurl" == "true" ]; then
+  echo "Can't find libcurl..aborting."
+fi
+if [ "$no_libncurses" == "true" ]; then
+  echo "Can't find libncurses..aborting."
+fi
+if [ "$no_libcurl" == "true" ] || [ "$no_libncurses" == "true" ]; then
+  exit 1
 fi
 
 echo "CC=$CC
