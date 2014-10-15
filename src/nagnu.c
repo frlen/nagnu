@@ -21,33 +21,32 @@ char *match;
 int ypos = 0;
 int xpos = 0;
 int reset_vars = 0;
-int first_run = 0;
 int last_type = 0;
 char *path = "excludes";
 int num_strings = 0;
 int longest_string = 0;
-char **get_excludes();
 char **excludes_save;
 extern char *cvalue;
+char **errorss;
+int   errorsCounter = 0;
 
 int main(int argc, char **argv)
 {
-    if (first_run == 0)
+    int i = 0;
+    get_arguments(argc, argv);
+    get_conf();
+    count_strings();
+    excludes_save = malloc(num_strings * sizeof(char *));
+    for (int i = 0; i < num_strings; i++)
     {
-        get_arguments(argc, argv);
-        get_conf();
-        count_strings();
-        excludes_save = malloc(num_strings * sizeof(char *));
-        for (int i = 0; i < num_strings; i++)
-        {
-            excludes_save[i] = malloc((longest_string+1) * sizeof(char));
-        }
-        get_excludes();
+        excludes_save[i] = malloc((longest_string+1) * sizeof(char));
     }
+    get_excludes();
 
     initscr();
     while (true)
     {
+        errorsCounter = 0;
         wr_index = 0;
         clear();
         if(has_colors() == FALSE)
@@ -68,7 +67,8 @@ int main(int argc, char **argv)
         refresh();
 
         reset_vars = 1;
-        first_run = 1;
+
+        free(errorss);
 
         sleep(10);
     }
@@ -111,6 +111,7 @@ int get_data()
     curl_easy_cleanup(curl);
 
     if ( curl_res == 0 ) {
+      service_problems();
       sort_data(host);
     } else {
       printf("Curl failed");
@@ -121,163 +122,145 @@ int get_data()
   return 0;
 }
 
-int service_problems() 
+char **service_problems() 
 {
-  char  line[2500];
+  char  line[3500];
   int   counter = 0;
-  int   errorsCounter = 0;
-  char  statuswarning[] = "statusBGWARNING'";
-  char  statuscritical[] = "statusBGCRITICAL'";
-  char  statusunknown[] = "statusBGUNKNOWN'";
-  char  errorss[5000][500];
+  char  status_hostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
+  char  status_even[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
+  char  status_odd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
+  char  status_warning[] = "statusBGWARNING'";
+  char  status_critical[] = "statusBGCRITICAL'";
+  char  status_unknown[] = "statusBGUNKNOWN'";
   int   i = 0;
-
-  while(wr_buf != '\0') {
-    line[counter] = wr_buf[i];
-    ++i;
-    ++counter;
-    if(wr_buf[i] == '\n') {
-
-      if((strcasestr(line, statuswarning) || strcasestr(line, statuscritical)	|| strcasestr(line, statusunknown)) && !strcasestr(line, "#comments")) {
-        strcpy(errorss[errorsCounter], line);
-        ++errorsCounter;
-      }
-    counter = 0;
-    memset( line, '\0', sizeof(line) );
-    }
-    if(wr_buf[i] == '\0') {
+  int   j = 0;
+  int match = 0;
+  int type = 0;
+  
+  errorss = malloc(sizeof(wr_buf));
+  
+  for(size_t i=0; i <= (size_t)wr_buf; ++i)
+  {
+    if(wr_buf[i] != '\0')
+    {
+      line[counter] = wr_buf[i];
+    } else {
       break;
     }
+    if(line[counter] == '\n')
+    {
+      if((strcasestr(line, status_warning) || strcasestr(line, status_critical) || strcasestr(line, status_unknown) || strcasestr(line, status_hostdown) || strcasestr(line, status_even) || strcasestr(line, status_odd)) && !strcasestr(line, "#comments")) {
+        errorss[errorsCounter] = malloc(sizeof(char*)*counter+1);
+        memset(errorss[errorsCounter], '\0', sizeof(char*)*counter+1);
+        strcpy(errorss[errorsCounter], line);
+        errorsCounter++;
+      }
+      memset(line, '\0', sizeof(line));
+      counter = 0;
+    } else {
+      counter++;
+    }
   }
-  printf("Nr of error lines: %d\n", errorsCounter);
-  return 0;
+  errorsCounter--;
+
+  return errorss;
 }
 
 void sort_data(char hostar[]) 
 {
-  char statushostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
-  char statusEven[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
-  char statusOdd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
-  char statuswarning[] = "statusBGWARNING'";
-  char statuscritical[] = "statusBGCRITICAL'";
-  char statusunknown[] = "statusBGUNKNOWN'";
+  char status_hostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
+  char status_even[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
+  char status_odd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
+  char status_warning[] = "statusBGWARNING'";
+  char status_critical[] = "statusBGCRITICAL'";
+  char status_unknown[] = "statusBGUNKNOWN'";
   char *hostname = malloc(sizeof(char) * 50);
-  char *servicename = malloc(sizeof(char) * 100);
-  char hostLine[2500];
-  char serviceLine[2500 + 1];
-  int  hostCounter = 0;
-  int  serviceCounter = 0;
-  int  hostState = 0;
-  int  serviceState;
-  int  printHost = 0;
+  char *service_name = malloc(sizeof(char) * 100);
+  int  host_counter = 0;
+  int  service_counter = 0;
+  int  host_state = 0;
+  int  service_state;
+  int  print_host = 0;
   int  type;
   char hits[250];
-  char serviceStateName[20];
-  int exclude_counter = 0;
-  int is_exclude = 0;
+  char service_state_name[20];
+  int  exclude_counter = 0;
+  int  is_exclude = 0;
+  int  i = 0;
+  int  service = 0;
 
-  for(size_t i=0; i <= (size_t)wr_buf; ++i) 
+  for(i=0; i <= errorsCounter; i++)
   {
-    if(wr_buf[i] == '\0')
+    if(errorss[i] == '\0')
     {
         break;
     }
-    hostState = 0;
-    if(wr_buf[i] == '\n') 
+
+    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_even) || strcasestr(errorss[i], status_odd)) 
     {
-        if(strcasestr(hostLine, statushostdown) || strcasestr(hostLine, statusEven) || strcasestr(hostLine, statusOdd)) 
+      type = 0;
+      hostname = match_string(errorss[i], type);
+      printf("%s\n", hostname);
+      if(strcasestr(errorss[i], status_hostdown))
+      {
+        host_state = 2;
+      }
+
+      if(host_state < 1)
+      {
+        for(service = 0; service <= errorsCounter; ++service)
         {
-          type = 0;
-          hostname = match_string(hostLine, type);
-          if(strcasestr(hostLine, statushostdown)) 
+          sprintf(hits, "extinfo.cgi?type=2&host=%s&service=", hostname);
+          if(strcasestr(errorss[service], hits))
           {
-            hostState = 2;
-            print_object(hostname, hostState, type);
-            printf("\n\n");
-          }
-          
-          if(hostState < 1) 
-          {
-            for(int service = 0; service <= (size_t)wr_buf; ++service) 
+            if((strcasestr(errorss[service], status_warning) || strcasestr(errorss[service], status_critical) || strcasestr(errorss[service], status_unknown)) && !strcasestr(errorss[service], "#comments"))
             {
-              serviceLine[serviceCounter] = wr_buf[service];
-              ++serviceCounter;
-              if(wr_buf[service] == '\n') 
+              type = 1;
+              service_name = match_string(errorss[service], type);
+              exclude_counter = 0;
+              while(exclude_counter < num_strings)
               {
-
-                sprintf(hits, "extinfo.cgi?type=2&host=%s&service=", hostname);
-                if(strcasestr(serviceLine, hits)) 
+                if(strcasestr(service_name, excludes_save[exclude_counter]))
                 {
-                  
-                  if((strcasestr(serviceLine, statuswarning) || strcasestr(serviceLine, statuscritical) || strcasestr(serviceLine, statusunknown)) && !strcasestr(serviceLine, "#comments")) 
-                  {
-                    type = 1;
-                    servicename = match_string(serviceLine, type);
-                    exclude_counter = 0;
-                    while(exclude_counter < num_strings) 
-                    {
-                      if(strcasestr(servicename, excludes_save[exclude_counter])) 
-                      {
-                        is_exclude = 1;
-                        break;
-                      }
-                      ++exclude_counter;
-                    }
-                    if(is_exclude == 1) 
-                    {
-                      is_exclude = 0;
-                      printHost = 0;
-                      serviceCounter = 0;
-                      memset( serviceLine, '\0', sizeof(serviceLine));
-                      continue;
-                    }
-
-                    if(printHost == 0) 
-                    {
-                      type = 0;
-                      print_object(hostname, hostState, type);
-                      printHost = 1;
-                    }
-                    type = 1;
-                    if(strcasestr(serviceLine, statuswarning)) {
-                      serviceState = 1;
-                      strcpy(serviceStateName, "WARNING");
-                    } else if(strcasestr(serviceLine, statuscritical)) {
-                      serviceState = 2;
-                      strcpy(serviceStateName, "CRITICAL");
-                    } else if(strcasestr(serviceLine, statusunknown)) {
-                      serviceState = 3;
-                      strcpy(serviceStateName, "UNKNOWN");
-                    }
-
-                    print_object(serviceStateName, serviceState, type);
-                    attron(A_BOLD);
-                    printw(" %s\n", servicename);
-                    attroff(A_BOLD);
-                  }
+                  is_exclude = 1;
+                  break;
                 }
-                serviceCounter = 0;
-                memset( serviceLine, '\0', sizeof(serviceLine) );
-              } else if(wr_buf[service] == '\0') {
-                break;
+                ++exclude_counter;
               }
+              if(is_exclude == 1)
+              {
+                is_exclude = 0;
+                print_host = 0;
+                continue;
+              }
+              if(print_host == 0)
+              {
+                type = 0;
+                print_object(hostname, host_state, type);
+                print_host = 1;
+              }
+              type = 1;
+              if(strcasestr(errorss[service], status_warning)) {
+                service_state = 1;
+                strcpy(service_state_name, "WARNING");
+              } else if(strcasestr(errorss[service], status_critical)) {
+                service_state = 2;
+                strcpy(service_state_name, "CRITICAL");
+              } else if(strcasestr(errorss[service], status_unknown)) {
+                service_state = 3;
+                strcpy(service_state_name, "UNKNOWN");
+              }
+
+              print_object(service_state_name, service_state, type);
+              attron(A_BOLD);
+              printw(" %s\n", service_name);
+              attroff(A_BOLD);
             }
           }
-          printHost = 0;
-
         }
-
-      hostCounter = 0;
-      memset( hostLine, '\0', sizeof(hostLine) );
-    } else if (wr_buf[i] == '\0') {
-      free(servicename);
-      free(hostname);
-
-      break;
+        print_host = 0;
+      }
     }
-    hostLine[hostCounter] = wr_buf[i];
-    ++hostCounter;
-
   }
 
   return;

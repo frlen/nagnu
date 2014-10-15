@@ -18,5 +18,7 @@ extern char server_address[256];
 extern char user_pwd[256];
 char **get_excludes();
 char **excludes_save;
+char **errorss;
 int num_strings;
 int get_arguments(int argc, char **argv);
+char **service_problems();
