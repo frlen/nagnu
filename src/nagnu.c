@@ -200,7 +200,6 @@ void sort_data(char hostar[])
     {
       type = 0;
       hostname = match_string(errorss[i], type);
-      printf("%s\n", hostname);
       if(strcasestr(errorss[i], status_hostdown))
       {
         host_state = 2;
@@ -279,10 +278,12 @@ char * match_string(char line[], int type)
   } else {
     nmatch = 8;
 
-    /* Switch the pattern rows below for nagios 3.5 or later */
-
-    *pattern = "<TD ALIGN=LEFT valign=center CLASS='\\(.*\\)'><A HREF='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</A></TD>"; /* Nagios < 3.5 */
-    //*pattern = "<td align='left' valign=center class='\\(.*\\)'><a href='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</a></td></tr>"; /* Nagios >= 3.5 */
+    if(strcmp(cgi_version_new, "true"))
+    {
+      *pattern = "<TD ALIGN=LEFT valign=center CLASS='\\(.*\\)'><A HREF='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</A></TD>"; /* Nagios < 3.5 */
+    } else {
+      *pattern = "<td align='left' valign=center class='\\(.*\\)'><a href='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</a></td></tr>"; /* Nagios >= 3.5 */
+    }
   }
   char *match = malloc(sizeof(char) * 100);
 

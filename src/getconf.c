@@ -3,6 +3,7 @@ char user[256];
 char passwd[256];
 char server_address[256];
 char user_pwd[256];
+char cgi_version_new[256];
 extern char *cvalue;
 
 int get_conf()
@@ -56,8 +57,9 @@ int read_conf(char path[])
   const char *server = "server";
   const char *username = "username";
   const char *password = "password";
+  const char *newcgi = "newcgi";
   int i = 0;
-  int is_server = 0, is_username = 0, is_password = 0;
+  int is_server = 0, is_username = 0, is_password = 0, is_newcgi = 0;
 
   FILE *fp;
   fp = fopen(path, "r");
@@ -110,6 +112,13 @@ int read_conf(char path[])
           i = 0;
           is_password = 0;
         }
+        if (is_newcgi == 1)
+        {
+          strcpy(cgi_version_new, store_input);
+          memset(store_input, '\0', sizeof(store_input));
+          i = 0;
+          is_newcgi = 0;
+        }
       }
     }
   
@@ -135,6 +144,13 @@ int read_conf(char path[])
       {
         i = 0;
         is_password = 1;
+        memset(store_input, '\0', sizeof(store_input));
+        continue;
+      }
+      if (!strcmp(store_input,newcgi))
+      {
+        i = 0;
+        is_newcgi = 1;
         memset(store_input, '\0', sizeof(store_input));
         continue;
       }

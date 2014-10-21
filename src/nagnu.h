@@ -16,6 +16,7 @@ int look_for_conf(char path[], int cvalue);
 extern char passwd[256];
 extern char server_address[256];
 extern char user_pwd[256];
+extern char cgi_version_new[256];
 char **get_excludes();
 char **excludes_save;
 char **errorss;
