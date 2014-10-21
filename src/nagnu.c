@@ -68,8 +68,6 @@ int main(int argc, char **argv)
 
         reset_vars = 1;
 
-        free(errorss);
-
         sleep(10);
     }
 
@@ -113,6 +111,7 @@ int get_data()
     if ( curl_res == 0 ) {
       service_problems();
       sort_data(host);
+      free(errorss);
     } else {
       printf("Curl failed");
     }
