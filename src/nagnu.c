@@ -193,6 +193,7 @@ void sort_data(char hostar[])
 
     if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_even) || strcasestr(errorss[i], status_odd)) 
     {
+      host_state = 0;
       type = 0;
       hostname = match_string(errorss[i], type);
       if(strcasestr(errorss[i], status_hostdown))
