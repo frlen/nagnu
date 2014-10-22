@@ -14,7 +14,7 @@ if [ "$OS" == "Darwin" ]; then
     no_libncurses="true"
   fi
   CC=clang
-  CFLAGS="/usr/lib/libcurl.dylib /usr/lib/libncurses.dylib -std=c99"
+  CFLAGS="/usr/lib/libcurl.dylib /usr/lib/libncurses.dylib"
 
 elif [ "$OS" == "FreeBSD" ]; then
   if [ -f /usr/local/lib/libcurl.so ]; then
@@ -28,7 +28,7 @@ elif [ "$OS" == "FreeBSD" ]; then
     no_libncurses="true"
   fi
   CC=clang
-  CFLAGS="/usr/local/lib/libcurl.so /usr/lib/libncurses.so -std=c99 -I/usr/local/include"
+  CFLAGS="/usr/local/lib/libcurl.so /usr/lib/libncurses.so -I/usr/local/include"
 
 elif [ "$OS" == "Linux" ]; then
   if [ -f /usr/lib/libcurl.so ]; then
@@ -42,7 +42,7 @@ elif [ "$OS" == "Linux" ]; then
     no_libncurses="true"
   fi
   CC=gcc
-  CFLAGS="/usr/lib/libcurl.so /usr/lib/libncurses.so -std=c99"
+  CFLAGS="/usr/lib/libcurl.so /usr/lib/libncurses.so"
 fi
 
 if [ "$no_libcurl" == "true" ]; then

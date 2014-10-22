@@ -32,12 +32,12 @@ int   errorsCounter = 0;
 
 int main(int argc, char **argv)
 {
-    int i = 0;
+    int i;
     get_arguments(argc, argv);
     get_conf();
     count_strings();
     excludes_save = malloc(num_strings * sizeof(char *));
-    for (int i = 0; i < num_strings; i++)
+    for (i = 0; i < num_strings; i++)
     {
         excludes_save[i] = malloc((longest_string+1) * sizeof(char));
     }
@@ -126,15 +126,12 @@ char **service_problems()
   char  line[3500];
   int   counter = 0;
   char  status_hostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
+  char  status_hostunreachable[] = "'statusHOSTUNREACHABLE'><a href='extinfo.cgi?type=1";
   char  status_even[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
   char  status_odd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
   char  status_warning[] = "statusBGWARNING'";
   char  status_critical[] = "statusBGCRITICAL'";
   char  status_unknown[] = "statusBGUNKNOWN'";
-  int   i = 0;
-  int   j = 0;
-  int match = 0;
-  int type = 0;
   
   errorss = malloc(sizeof(wr_buf));
   
@@ -148,7 +145,7 @@ char **service_problems()
     }
     if(line[counter] == '\n')
     {
-      if((strcasestr(line, status_warning) || strcasestr(line, status_critical) || strcasestr(line, status_unknown) || strcasestr(line, status_hostdown) || strcasestr(line, status_even) || strcasestr(line, status_odd)) && !strcasestr(line, "#comments")) {
+      if((strcasestr(line, status_warning) || strcasestr(line, status_critical) || strcasestr(line, status_unknown) || strcasestr(line, status_hostdown) || strcasestr(line, status_hostunreachable) || strcasestr(line, status_even) || strcasestr(line, status_odd)) && !strcasestr(line, "#comments")) {
         errorss[errorsCounter] = malloc(sizeof(char*)*counter+1);
         memset(errorss[errorsCounter], '\0', sizeof(char*)*counter+1);
         strcpy(errorss[errorsCounter], line);
@@ -168,6 +165,7 @@ char **service_problems()
 void sort_data(char hostar[]) 
 {
   char status_hostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
+  char status_hostunreachable[] = "'statusHOSTUNREACHABLE'><a href='extinfo.cgi?type=1";
   char status_even[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
   char status_odd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
   char status_warning[] = "statusBGWARNING'";
@@ -175,8 +173,6 @@ void sort_data(char hostar[])
   char status_unknown[] = "statusBGUNKNOWN'";
   char *hostname = malloc(sizeof(char) * 50);
   char *service_name = malloc(sizeof(char) * 100);
-  int  host_counter = 0;
-  int  service_counter = 0;
   int  host_state = 0;
   int  service_state;
   int  print_host = 0;
@@ -185,7 +181,7 @@ void sort_data(char hostar[])
   char service_state_name[20];
   int  exclude_counter = 0;
   int  is_exclude = 0;
-  int  i = 0;
+  int  i;
   int  service = 0;
 
   for(i=0; i <= errorsCounter; i++)
@@ -195,13 +191,19 @@ void sort_data(char hostar[])
         break;
     }
 
-    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_even) || strcasestr(errorss[i], status_odd)) 
+    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_even) || strcasestr(errorss[i], status_odd)) 
     {
       type = 0;
       hostname = match_string(errorss[i], type);
       if(strcasestr(errorss[i], status_hostdown))
       {
         host_state = 2;
+        print_object(hostname, host_state, type);
+      }
+      if(strcasestr(errorss[i], status_hostunreachable))
+      {
+        host_state = 3;
+        print_object(hostname, host_state, type);
       }
 
       if(host_state < 1)
