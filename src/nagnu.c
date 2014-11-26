@@ -62,7 +62,10 @@ int main(int argc, char **argv)
         init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
         init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
         init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
+        init_pair(5, COLOR_BLACK, COLOR_BLACK);   // BLACK
+        init_pair(6, COLOR_BLACK, COLOR_WHITE);   // WHITE
 
+        bkgd(COLOR_PAIR(5));
         get_data();
         refresh();
 
@@ -337,9 +340,24 @@ int print_object(char *object, int state, int type)
     attroff(COLOR_PAIR(state));
     last_type = 1;
   } else {
-    mvprintw(ypos, xpos, " %s ", object);
-    attroff(COLOR_PAIR(state));
+    
+    //If a host is down, make sure it SHOWS!
+    if (state == 3) 
+    {
+      bkgd(COLOR_PAIR(state));
+      attroff(COLOR_PAIR(state));
+      attron(COLOR_PAIR(6));
+      mvprintw(ypos, xpos, " %s ", object);
+      attroff(COLOR_PAIR(6));
+    } else {
+      mvprintw(ypos, xpos, " %s ", object);
+      attroff(COLOR_PAIR(state));
+    }
     last_type = 0;
+    if (state == 3)
+    {
+      ++ypos;
+    }
   }
   attroff(COLOR_PAIR(state));
   ++ypos;
