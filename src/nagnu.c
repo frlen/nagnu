@@ -62,13 +62,14 @@ int main(int argc, char **argv)
         init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
         init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
         init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
-        init_pair(5, COLOR_BLACK, COLOR_BLACK);   // BLACK
-        init_pair(6, COLOR_BLACK, COLOR_WHITE);   // WHITE
+        init_pair(5, COLOR_WHITE, COLOR_BLACK);   // BLACK
+        init_pair(6, COLOR_BLACK, COLOR_WHITE);   // WHITE/BLACK
+        init_pair(7, COLOR_WHITE, COLOR_RED);     // WHITE/RED
 
         bkgd(COLOR_PAIR(5));
+
         get_data();
         refresh();
-
         reset_vars = 1;
 
         sleep(10);
@@ -186,6 +187,22 @@ void sort_data(char hostar[])
   int  is_exclude = 0;
   int  i;
   int  service = 0;
+
+
+  // Determine wether a host is down, and if so, change the background to red.
+  for(i=0; i <= errorsCounter; i++)
+  {
+    if(errorss[i] == '\0')
+    {
+        break;
+    }
+
+    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable))
+    {
+      //Host is down, change the background color.
+      bkgd(COLOR_PAIR(7));
+    }
+  }
 
   for(i=0; i <= errorsCounter; i++)
   {
@@ -344,7 +361,6 @@ int print_object(char *object, int state, int type)
     //If a host is down, make sure it SHOWS!
     if (state == 3) 
     {
-      bkgd(COLOR_PAIR(state));
       attroff(COLOR_PAIR(state));
       attron(COLOR_PAIR(6));
       mvprintw(ypos, xpos, " %s ", object);
