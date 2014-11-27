@@ -62,7 +62,7 @@ int main(int argc, char **argv)
         init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
         init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
         init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
-        init_pair(5, COLOR_BLACK, COLOR_BLACK);   // BLACK
+        init_pair(5, COLOR_WHITE, COLOR_BLACK);   // BLACK
         init_pair(6, COLOR_BLACK, COLOR_WHITE);   // WHITE
 
         bkgd(COLOR_PAIR(5));
