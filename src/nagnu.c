@@ -28,7 +28,7 @@ int longest_string = 0;
 char **excludes_save;
 extern char *cvalue;
 char **errorss;
-int   errorsCounter = 0;
+int errorsCounter = 0;
 
 int main(int argc, char **argv)
 {
@@ -101,6 +101,7 @@ int get_data()
   CURLcode curl_res;
   curl = curl_easy_init();
   char host[5] = "FALSE";
+  int i;
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
@@ -115,6 +116,9 @@ int get_data()
     if ( curl_res == 0 ) {
       service_problems();
       sort_data(host);
+      for (i=0; i<=errorsCounter; i++) {
+        free(errorss[i]);
+      }
       free(errorss);
     } else {
       printf("Curl failed");
@@ -175,8 +179,8 @@ void sort_data(char hostar[])
   char status_warning[] = "statusBGWARNING'";
   char status_critical[] = "statusBGCRITICAL'";
   char status_unknown[] = "statusBGUNKNOWN'";
-  char *hostname = malloc(sizeof(char) * 50);
-  char *service_name = malloc(sizeof(char) * 100);
+  char *hostname;
+  char *service_name;
   int  host_state = 0;
   int  service_state;
   int  print_host = 0;
@@ -216,6 +220,7 @@ void sort_data(char hostar[])
       host_state = 0;
       type = 0;
       hostname = match_string(errorss[i], type);
+      free(match);
       if(strcasestr(errorss[i], status_hostdown))
       {
         host_state = 2;
@@ -238,6 +243,7 @@ void sort_data(char hostar[])
             {
               type = 1;
               service_name = match_string(errorss[service], type);
+              free(match);
               exclude_counter = 0;
               while(exclude_counter < num_strings)
               {
@@ -276,11 +282,13 @@ void sort_data(char hostar[])
               attron(A_BOLD);
               printw(" %s\n", service_name);
               attroff(A_BOLD);
+              free(service_name);
             }
           }
         }
         print_host = 0;
       }
+      free(hostname);
     }
   }
 
@@ -307,7 +315,7 @@ char * match_string(char line[], int type)
       *pattern = "<td align='left' valign=center class='\\(.*\\)'><a href='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</a></td></tr>"; /* Nagios >= 3.5 */
     }
   }
-  char *match = malloc(sizeof(char) * 100);
+  char *match = malloc(100);
 
   typeregex = regcomp(&regex, *pattern, 0);
   if( typeregex ) {
