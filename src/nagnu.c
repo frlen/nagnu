@@ -121,7 +121,12 @@ int get_data()
       }
       free(errorss);
     } else {
-      printf("Curl failed");
+      char msg_no_conn[]=" No connection to server! ";
+      int row,col;
+      getmaxyx(stdscr,row,col);
+      attron(COLOR_PAIR(7));
+      mvprintw(row/2,(col-strlen(msg_no_conn))/2,"%s",msg_no_conn);
+      attroff(COLOR_PAIR(7));
     }
 
   }
