@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <string.h>
+#include "excludes.h"
+#include "nagnu.h"
+
 extern char *evalue;
 
 void count_strings()

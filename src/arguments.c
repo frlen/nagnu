@@ -1,3 +1,7 @@
+#include <stdlib.h>
+#include <unistd.h>
+#include "arguments.h"
+
 char *cvalue = NULL;
 char *evalue = NULL;
 int ch;
