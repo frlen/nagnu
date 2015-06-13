@@ -1,0 +1,11 @@
+CC=clang
+
+CFLAGS=/usr/local/lib/libcurl.so /usr/lib/libncurses.so -I/usr/local/include
+
+all: nagnu
+
+nagnu: src/nagnu.c
+	$(CC) $(CFLAGS) src/nagnu.c src/excludes.c src/arguments.c src/getconf.c -o nagnu
+
+clean:
+	rm -f nagnu
