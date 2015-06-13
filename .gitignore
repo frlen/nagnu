@@ -40,3 +40,4 @@ autoscan.log
 config.h
 config.rpath
 configure.ac
+config.status
