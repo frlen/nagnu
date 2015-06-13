@@ -34,3 +34,9 @@ install-sh
 missing
 stamp-h1
 config.log
+ABOUT-NLS
+ChangeLog
+autoscan.log
+config.h
+config.rpath
+configure.ac
