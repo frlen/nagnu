@@ -145,10 +145,11 @@ char **service_problems()
   char  status_warning[] = "statusBGWARNING'";
   char  status_critical[] = "statusBGCRITICAL'";
   char  status_unknown[] = "statusBGUNKNOWN'";
+  size_t i;
   
   errorss = malloc(sizeof(wr_buf));
   
-  for(size_t i=0; i <= (size_t)wr_buf; ++i)
+  for(i=0; i <= (size_t)wr_buf; ++i)
   {
     if(wr_buf[i] != '\0')
     {
