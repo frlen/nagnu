@@ -23,3 +23,15 @@
 Makefile
 nagnu
 excludes
+
+# Autotools
+
+Makefile.in
+autom4te.cache
+aclocal.m4
+compile
+configure
+depcomp
+install-sh
+missing
+stamp-h1
