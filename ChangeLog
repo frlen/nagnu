@@ -1,4 +1,0 @@
-2015-06-13  gettextize  <bug-gnu-gettext@gnu.org>
-
-	* configure.ac (AC_CONFIG_FILES): Add intl/Makefile, po/Makefile.in.
-
