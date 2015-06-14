@@ -12,8 +12,8 @@
 #include "excludes.h"
 #include "arguments.h"
 
-#define MAX_BUF 1755360
-#define MAXLINE 1000
+#define MAX_BUF 3510720
+#define MAXLINE 2000
 
 char wr_buf[MAX_BUF+2];
 int wr_index;
