@@ -1,7 +1,7 @@
 nagnu
 =====
 
-Nagios frontend
+Nagios dashboard
 
 ### Tested with
 * Nagios 3.2.3
