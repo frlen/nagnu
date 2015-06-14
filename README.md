@@ -10,8 +10,16 @@ Nagios frontend
 
 ### Tested on
 * MacOS X 10.9
-* FreeBSD 10
+* FreeBSD 10.1
+* OpenBSD 5.6
 * Scientific Linux 6.5
+* Ubuntu 14.04
+
+### Build instructions
+git clone https://github.com/frlen/nagnu.git
+cd nagnu
+./configure
+make
 
 ### Configuration
 -c [configfile]
