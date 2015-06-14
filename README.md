@@ -16,9 +16,9 @@ Nagios frontend
 * Ubuntu 14.04
 
 ### Build instructions
-git clone https://github.com/frlen/nagnu.git
-cd nagnu
-./configure
+git clone https://github.com/frlen/nagnu.git  
+cd nagnu  
+./configure  
 make
 
 ### Configuration
@@ -30,4 +30,3 @@ See nagnu.conf.sample
 -e [excludesfile]
 
 Place service_description in a file, one per line, to exclude them from the output.
- 
