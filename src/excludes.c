@@ -8,7 +8,7 @@ extern char *evalue;
 void count_strings()
 {
     int string_length = 0;
-    char c[512];
+    char c[1];
     FILE *fp = fopen(evalue, "r");
 
     if(fp)
