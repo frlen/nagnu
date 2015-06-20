@@ -27,6 +27,7 @@ int num_strings = 0;
 int longest_string = 0;
 char **excludes_save;
 extern char *cvalue;
+int svalue;
 char **errorss;
 int errorsCounter = 0;
 
@@ -72,7 +73,7 @@ int main(int argc, char **argv)
         refresh();
         reset_vars = 1;
 
-        sleep(10);
+        sleep(svalue);
     }
 
     endwin();
