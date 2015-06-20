@@ -1,6 +1,8 @@
 nagnu
 =====
 
+![nagnu](http://frlen.github.io/nagnu.png)
+
 Nagios dashboard
 
 ### Tested with
