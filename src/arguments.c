@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include "arguments.h"
+
 char *cvalue = NULL;
 int ch;
 

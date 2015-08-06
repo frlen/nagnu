@@ -1,3 +1,5 @@
+#include "excludes.h"
+
 void count_strings()
 {
     int string_length = 0;

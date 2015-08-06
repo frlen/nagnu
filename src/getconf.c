@@ -1,3 +1,8 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "getconf.h"
+
 char *file_name = "nagnu.conf";
 char user[256];
 char passwd[256];

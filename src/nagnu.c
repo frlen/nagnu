@@ -8,9 +8,9 @@
 #include <unistd.h>
 #include <curses.h>
 #include "nagnu.h"
+#include "arguments.h"
 #include "getconf.h"
 #include "excludes.h"
-#include "arguments.h"
 
 #define MAX_BUF 1755360
 #define MAXLINE 1000
