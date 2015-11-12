@@ -228,6 +228,26 @@ void sort_data(char hostar[])
       type = 0;
       hostname = match_string(errorss[i], type);
       free(match);
+
+      // Check for hostname in excludes.
+      exclude_counter=0;
+      while(exclude_counter < num_strings)
+      {
+        if(strcasestr(hostname, excludes_save[exclude_counter]))
+        {
+          is_exclude = 1;
+          break;
+        }
+        ++exclude_counter;
+      }
+
+      // Move on to the next host if this one is in excludes.
+      if(is_exclude == 1)
+      {
+        is_exclude = 0;
+        continue;
+      }
+
       if(strcasestr(errorss[i], status_hostdown))
       {
         host_state = 2;
