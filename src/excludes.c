@@ -1,10 +1,15 @@
+#include <stdio.h>
+#include <string.h>
 #include "excludes.h"
+#include "nagnu.h"
+
+extern char *evalue;
 
 void count_strings()
 {
     int string_length = 0;
-    char c[512];
-    FILE *fp = fopen("excludes", "r");
+    char c[1];
+    FILE *fp = fopen(evalue, "r");
 
     if(fp)
     {
@@ -29,9 +34,9 @@ void count_strings()
 char **get_excludes()
 {
     int i = 0;
-    char c[1080];
-    FILE *fp = fopen("excludes", "r");
-    char store_input[512];
+    char c[1024];
+    FILE *fp = fopen(evalue, "r");
+    char store_input[1025];
     int num_strings_cpy = num_strings-1;
     memset(store_input, '\0', sizeof(store_input));
     if(fp)

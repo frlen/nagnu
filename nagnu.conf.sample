@@ -6,3 +6,6 @@ username foo
 
 # Password
 password bar
+
+# For nagios < 3.5 change this to false
+newcgi true
