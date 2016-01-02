@@ -34,9 +34,9 @@ void count_strings()
 char **get_excludes()
 {
     int i = 0;
-    char c[1080];
+    char c[1024];
     FILE *fp = fopen(evalue, "r");
-    char store_input[512];
+    char store_input[1025];
     int num_strings_cpy = num_strings-1;
     memset(store_input, '\0', sizeof(store_input));
     if(fp)

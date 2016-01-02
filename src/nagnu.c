@@ -139,13 +139,11 @@ char **service_problems()
 {
   char  line[3500];
   int   counter = 0;
-  char  status_hostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
-  char  status_hostunreachable[] = "'statusHOSTUNREACHABLE'><a href='extinfo.cgi?type=1";
-  char  status_even[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
-  char  status_odd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
-  char  status_warning[] = "statusBGWARNING'";
-  char  status_critical[] = "statusBGCRITICAL'";
-  char  status_unknown[] = "statusBGUNKNOWN'";
+  char  status_hostdown[] = "DWN";
+  char  status_hostunreachable[] = "UNR";
+  char  status_warning[] = "WRN";
+  char  status_critical[] = "CRI";
+  char  status_unknown[] = "UNK";
   size_t i;
   
   errorss = malloc(sizeof(wr_buf));
@@ -160,7 +158,7 @@ char **service_problems()
     }
     if(line[counter] == '\n')
     {
-      if((strcasestr(line, status_warning) || strcasestr(line, status_critical) || strcasestr(line, status_unknown) || strcasestr(line, status_hostdown) || strcasestr(line, status_hostunreachable) || strcasestr(line, status_even) || strcasestr(line, status_odd)) && !strcasestr(line, "#comments")) {
+      if((strcasestr(line, status_warning) || strcasestr(line, status_critical) || strcasestr(line, status_unknown) || strcasestr(line, status_hostdown) || strcasestr(line, status_hostunreachable)) && !strcasestr(line, "#comments")) {
         errorss[errorsCounter] = malloc(sizeof(char*)*counter+1);
         memset(errorss[errorsCounter], '\0', sizeof(char*)*counter+1);
         strcpy(errorss[errorsCounter], line);
@@ -179,13 +177,11 @@ char **service_problems()
 
 void sort_data(char hostar[]) 
 {
-  char status_hostdown[] = "'statusHOSTDOWN'><A HREF='extinfo.cgi?type=1";
-  char status_hostunreachable[] = "'statusHOSTUNREACHABLE'><a href='extinfo.cgi?type=1";
-  char status_even[] = "'statusEven'><A HREF='extinfo.cgi?type=1";
-  char status_odd[] = "'statusOdd'><A HREF='extinfo.cgi?type=1";
-  char status_warning[] = "statusBGWARNING'";
-  char status_critical[] = "statusBGCRITICAL'";
-  char status_unknown[] = "statusBGUNKNOWN'";
+  char status_hostdown[] = "DWN";
+  char status_hostunreachable[] = "UNR";
+  char status_warning[] = "WRN";
+  char status_critical[] = "CRI";
+  char status_unknown[] = "UNK";
   char *hostname;
   char *service_name;
   int  host_state = 0;
@@ -198,7 +194,9 @@ void sort_data(char hostar[])
   int  is_exclude = 0;
   int  i;
   int  service = 0;
+  char last_hostname[250];
 
+  memset(last_hostname, '\0', 250);
 
   // Determine wether a host is down, and if so, change the background to red.
   for(i=0; i <= errorsCounter; i++)
@@ -222,11 +220,21 @@ void sort_data(char hostar[])
         break;
     }
 
-    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_even) || strcasestr(errorss[i], status_odd)) 
+    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_warning) || strcasestr(errorss[i], status_critical) || strcasestr(errorss[i], status_unknown)) 
     {
       host_state = 0;
-      type = 0;
+      if(strcasestr(errorss[i], status_hostdown)) 
+      {
+        type = 0;
+      } else {
+        type = 100;
+      }
+      
       hostname = match_string(errorss[i], type);
+      if(!strcmp(hostname, last_hostname))
+      {
+        continue;
+      }
       free(match);
 
       // Check for hostname in excludes.
@@ -263,7 +271,7 @@ void sort_data(char hostar[])
       {
         for(service = 0; service <= errorsCounter; ++service)
         {
-          sprintf(hits, "extinfo.cgi?type=2&host=%s&service=", hostname);
+          sprintf(hits, "value='%s'/>", hostname);
           if(strcasestr(errorss[service], hits))
           {
             if((strcasestr(errorss[service], status_warning) || strcasestr(errorss[service], status_critical) || strcasestr(errorss[service], status_unknown)) && !strcasestr(errorss[service], "#comments"))
@@ -291,6 +299,7 @@ void sort_data(char hostar[])
               {
                 type = 0;
                 print_object(hostname, host_state, type);
+                strcpy(last_hostname, hostname);
                 print_host = 1;
               }
               type = 1;
@@ -306,6 +315,7 @@ void sort_data(char hostar[])
               }
 
               print_object(service_state_name, service_state, type);
+        
               attron(A_BOLD);
               printw(" %s\n", service_name);
               attroff(A_BOLD);
@@ -328,18 +338,21 @@ char * match_string(char line[], int type)
   int typeregex;
   regmatch_t pmatch[8];
   size_t nmatch;
-  char *pattern[20];
+  char *pattern[200];
   if(type == 0) {
     nmatch = 3;
-    *pattern = ".*host=\\(.*\\)' ";
+    *pattern = "name='host' value='\\(.*\\)'/>";
+  } else if(type == 100) {
+    nmatch = 3;
+    *pattern = "name='host' value='\\(.*\\)'/><postfield";
   } else {
-    nmatch = 8;
+    nmatch = 3;
 
     if(strcmp(cgi_version_new, "true"))
     {
       *pattern = "<TD ALIGN=LEFT valign=center CLASS='\\(.*\\)'><A HREF='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</A></TD>"; /* Nagios < 3.5 */
     } else {
-      *pattern = "<td align='left' valign=center class='\\(.*\\)'><a href='extinfo.cgi?type=2&host=\\(.*\\)&service=\\(.*\\)'>\\(.*\\)</a></td></tr>"; /* Nagios >= 3.5 */
+      *pattern = "<postfield name='service' value='\\(.*\\)'/>"; /* Nagios >= 3.5 */
     }
   }
   char *match = malloc(100);
@@ -348,13 +361,13 @@ char * match_string(char line[], int type)
   if( typeregex ) {
     fprintf(stderr, "Could not compile regex\n");
     exit(1);
-   }
+  }
   typeregex = regexec(&regex, line, nmatch, pmatch, 0);
   if( !typeregex ){
-    if(type == 0) {
+    if((type == 0) || (type == 100 )) {
       sprintf(match, "%.*s", (int)(pmatch[1].rm_eo - pmatch[1].rm_so), &line[pmatch[1].rm_so]);
     } else {
-      sprintf(match, "%.*s", (int)(pmatch[4].rm_eo - pmatch[4].rm_so), &line[pmatch[4].rm_so]);
+      sprintf(match, "%.*s", (int)(pmatch[1].rm_eo - pmatch[1].rm_so), &line[pmatch[1].rm_so]);
     }
     regfree(&regex);
   } else {

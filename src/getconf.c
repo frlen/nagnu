@@ -164,7 +164,7 @@ int read_conf(char path[])
   }
 
   fclose(fp);
-  strcat(server_address, "/cgi-bin/status.cgi?host=all&limit=0");
+  strcat(server_address, "/cgi-bin/statuswml.cgi?style=uprobs");
   strcpy(user_pwd, user);
   strcat(user_pwd,":");
   strcat(user_pwd, passwd);
