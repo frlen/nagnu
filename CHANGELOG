@@ -1,0 +1,13 @@
+Nagnu 1.1
+=================
+
+The source of data has changed from 
+https://<nagios-server>/nagios/cgi-bin/status.cgi?hosts=all to 
+https://<nagios-server>/nagios/cgi-bin/statuswml.cgi?style=uprobs.
+This lessens the line of html nagnu has to parse significantly.
+On the server I primarlily test with it went from ~45000 lines to 77.
+
+Fix: Hosts without services was not shown previously.
+Fix: Services and hosts with notifications disabled are no longer shown.
+Feature: Hosts can now also be excluded in the same way as services.
+
