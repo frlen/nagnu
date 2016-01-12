@@ -12,10 +12,10 @@ Nagios dashboard
 
 ### Tested on
 * MacOS X 10.9
-* FreeBSD 10.1
+* FreeBSD 10.2
 * OpenBSD 5.6
-* Scientific Linux 6.5
 * Ubuntu 14.04
+* Raspbian (wheezy)
 
 ### Build instructions
 git clone https://github.com/frlen/nagnu.git  
@@ -31,4 +31,4 @@ See nagnu.conf.sample
 ### Excludes
 -e [excludesfile]
 
-Place service_description in a file, one per line, to exclude them from the output.
+Place service_description or hostname in a file, one per line, to exclude them from the output.
