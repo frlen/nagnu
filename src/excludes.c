@@ -8,14 +8,14 @@ extern char *evalue;
 void count_strings()
 {
     int string_length = 0;
-    char c[1];
+    int c;
     FILE *fp = fopen(evalue, "r");
 
     if(fp)
     {
-        while ((*c = getc(fp)) != EOF)
+        while ((c = getc(fp)) != EOF)
         {
-            if(strcmp(c,"\n"))
+            if(c != '\n')
             {
                 string_length++;
                 if(string_length > longest_string)
@@ -34,18 +34,18 @@ void count_strings()
 char **get_excludes()
 {
     int i = 0;
-    char c[1024];
+    int c;
     FILE *fp = fopen(evalue, "r");
     char store_input[1025];
     int num_strings_cpy = num_strings-1;
     memset(store_input, '\0', sizeof(store_input));
     if(fp)
     {
-        while ((*c = getc(fp)) != EOF)
+        while ((c = getc(fp)) != EOF)
         {
-            if(strcmp(c, "\n"))
+            if(c != '\n')
             {
-                store_input[i] = *c;
+                store_input[i] = c;
                 i++;
             } else {
                 strcpy(excludes_save[num_strings_cpy], store_input);
