@@ -22,7 +22,7 @@ int get_conf()
   possible_paths[0] = "./";
   possible_paths[1] = "/etc/";
   possible_paths[2] = "/usr/local/etc/";
-  
+
   if(cvalue != NULL)
   {
     state = look_for_conf(cvalue, 1);
@@ -56,10 +56,10 @@ int get_conf()
 
 int read_conf(char path[])
 {
-  char c[512];
-	memset(c, '\0', sizeof(c));
+  int c;
   int skip_line = 0;
-  char store_input[256];
+  char store_input[512];
+  memset(store_input, '\0', sizeof(store_input));
   const char *server = "server";
   const char *username = "username";
   const char *password = "password";
@@ -70,9 +70,9 @@ int read_conf(char path[])
   FILE *fp;
   fp = fopen(path, "r");
 
-  while ((*c = getc(fp)) != EOF) 
+  while ((c = getc(fp)) != EOF)
   {
-    if (skip_line == 1 && !strcmp(c, "\n"))
+    if (skip_line == 1 && c == '\n')
     {
       skip_line = 0;
     }
@@ -82,17 +82,17 @@ int read_conf(char path[])
       continue;
     }
 
-    if (!strcmp(c, "#"))
+    if (c == '#')
     {
       skip_line = 1;
       continue;
-    } 
+    }
 
-    if (strcmp(c, " "))
+    if (c != ' ')
     {
-      if (strcmp(c, "\n"))
+      if (c != '\n')
       {
-        store_input[i] = *c;
+        store_input[i] = c;
         i++;
       } else {
         if (is_server == 1)
@@ -102,7 +102,7 @@ int read_conf(char path[])
           i = 0;
           is_server = 0;
         }
-        
+
         if (is_username == 1)
         {
           strcpy(user, store_input);
@@ -110,7 +110,7 @@ int read_conf(char path[])
           i = 0;
           is_username = 0;
         }
-        
+
         if (is_password == 1)
         {
           strcpy(passwd, store_input);
@@ -127,8 +127,8 @@ int read_conf(char path[])
         }
       }
     }
-  
-    if (!strcmp(c, " ")) 
+
+    if (c == ' ')
     {
       if (!strcmp(store_input,server))
       {

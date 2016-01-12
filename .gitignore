@@ -41,3 +41,4 @@ config.h
 config.rpath
 configure.ac
 config.status
+config.log
