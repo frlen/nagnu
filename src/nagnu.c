@@ -208,6 +208,28 @@ void sort_data(char hostar[])
 
     if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable))
     {
+
+      // Check for hostname in excludes.
+      type = 0;
+      exclude_counter=0;
+      hostname = match_string(errorss[i], type);
+      while(exclude_counter < num_strings)
+      {
+        if(strcasestr(hostname, excludes_save[exclude_counter]))
+        {
+          is_exclude = 1;
+          break;
+        }
+        ++exclude_counter;
+      }
+
+      // Move on to the next host if this one is in excludes.
+      if(is_exclude == 1)
+      {
+        is_exclude = 0;
+        continue;
+      }
+
       //Host is down, change the background color.
       bkgd(COLOR_PAIR(7));
     }
@@ -223,7 +245,7 @@ void sort_data(char hostar[])
     if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_warning) || strcasestr(errorss[i], status_critical) || strcasestr(errorss[i], status_unknown)) 
     {
       host_state = 0;
-      if(strcasestr(errorss[i], status_hostdown)) 
+      if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable)) 
       {
         type = 0;
       } else {
