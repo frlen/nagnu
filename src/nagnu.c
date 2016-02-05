@@ -219,7 +219,7 @@ void sort_data(char hostar[])
       hostname = match_string(errorss[i], type);
       while(exclude_counter < num_strings)
       {
-        if(strcasestr(hostname, excludes_save[exclude_counter]))
+        if(!strcmp(hostname, excludes_save[exclude_counter]))
         {
           is_exclude = 1;
           break;
@@ -273,7 +273,7 @@ void sort_data(char hostar[])
       exclude_counter=0;
       while(exclude_counter < num_strings)
       {
-        if(strcasestr(hostname, excludes_save[exclude_counter]))
+        if(!strcmp(hostname, excludes_save[exclude_counter]))
         {
           is_exclude = 1;
           break;
