@@ -195,8 +195,12 @@ void sort_data(char hostar[])
   int  i;
   int  service = 0;
   char last_hostname[250];
+  char **hostsdown;
+  int  hostdown_counter = 0;
+  int  hostcounter;
 
   memset(last_hostname, '\0', 250);
+  hostsdown = malloc(sizeof(char *));
 
   // Determine wether a host is down, and if so, change the background to red.
   for(i=0; i <= errorsCounter; i++)
@@ -230,8 +234,14 @@ void sort_data(char hostar[])
         continue;
       }
 
-      //Host is down, change the background color.
+      //Host is down, change the background color and add to hostsdown.
       bkgd(COLOR_PAIR(7));
+ 
+      hostsdown = realloc(hostsdown, ((sizeof(char)*strlen(hostname))+sizeof(hostsdown)));
+      hostsdown[hostdown_counter] = malloc(sizeof(char)*strlen(hostname));
+      strcpy(hostsdown[hostdown_counter], hostname);
+      hostdown_counter++;
+      
     }
   }
 
@@ -276,6 +286,18 @@ void sort_data(char hostar[])
       {
         is_exclude = 0;
         continue;
+      }
+
+      // Move on if the host is down
+      if(hostdown_counter > 0)
+      {
+        for(hostcounter=0; hostcounter < hostdown_counter; hostcounter++)
+        {
+          if(strcasestr(hostname, hostsdown[hostcounter]))
+          {
+            host_state = 2;
+          }
+        }
       }
 
       if(strcasestr(errorss[i], status_hostdown))
@@ -350,6 +372,12 @@ void sort_data(char hostar[])
       free(hostname);
     }
   }
+
+  for(hostcounter=0; hostcounter < hostdown_counter; hostcounter++)
+  {
+    free(hostsdown[hostcounter]);
+  }
+  free(hostsdown);
 
   return;
 }
