@@ -1,7 +1,6 @@
 int get_data();
-void sort_data();
+struct hostprob *sort_data();
 int state_color();
-int print_object(char match[], int state, int type);
 size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);
 char *match_string(char line[], int type);
 int get_problems();
@@ -17,3 +16,10 @@ char **excludes_save;
 char **errorss;
 int num_strings;
 char **service_problems();
+void print_error_box();
+int get_type_or_status(char line[], int typeorstatus);
+int addhost(struct hostprob **hosthead, char *hostname, 
+            int type, char *service);
+void printlist(struct hostprob **head);
+void print_object(int state, char *object, int type);
+int findhostinlist(struct hostprob **hosthead, char *hostname);
