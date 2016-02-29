@@ -51,7 +51,7 @@ int main(int argc, char **argv)
         wr_index = 0;
         clear();
         if(has_colors() == FALSE)
-        { 
+        {
             endwin();
             printf("Your terminal does not support color\n");
             return 1;
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
         init_pair(1, COLOR_BLACK, COLOR_GREEN);   // OK
         init_pair(2, COLOR_BLACK, COLOR_YELLOW);  // WARNING
         init_pair(3, COLOR_BLACK, COLOR_RED);     // CRITICAL
-        init_pair(4, COLOR_BLACK, 5);   					// UNKNOWN
+        init_pair(4, COLOR_BLACK, 5);             // UNKNOWN
         init_pair(5, COLOR_WHITE, COLOR_BLACK);   // BLACK
         init_pair(6, COLOR_BLACK, COLOR_WHITE);   // WHITE/BLACK
         init_pair(7, COLOR_WHITE, COLOR_RED);     // WHITE/RED
@@ -89,7 +89,7 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
     return 0;
   }
 
-  (void) *memcpy( (void *)&wr_buf[wr_index], ptr, (size_t)segsize );
+  memcpy( (void *)&wr_buf[wr_index], ptr, (size_t)segsize );
   wr_index += segsize;
   wr_buf[wr_index] = 0;
 
@@ -103,7 +103,7 @@ int get_data()
   curl = curl_easy_init();
   char host[5] = "FALSE";
   int i;
-
+  
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
@@ -135,7 +135,7 @@ int get_data()
   return 0;
 }
 
-char **service_problems() 
+char **service_problems()
 {
   char  line[3500];
   int   counter = 0;
@@ -145,9 +145,9 @@ char **service_problems()
   char  status_critical[] = "CRI";
   char  status_unknown[] = "UNK";
   size_t i;
-  
+
   errorss = malloc(sizeof(wr_buf));
-  
+
   for(i=0; i <= (size_t)wr_buf; ++i)
   {
     if(wr_buf[i] != '\0')
@@ -175,7 +175,7 @@ char **service_problems()
   return errorss;
 }
 
-void sort_data(char hostar[]) 
+void sort_data(char hostar[])
 {
   char status_hostdown[] = "DWN";
   char status_hostunreachable[] = "UNR";
@@ -231,17 +231,18 @@ void sort_data(char hostar[])
       if(is_exclude == 1)
       {
         is_exclude = 0;
+        free(hostname);
         continue;
       }
 
       //Host is down, change the background color and add to hostsdown.
       bkgd(COLOR_PAIR(7));
- 
+
       hostsdown = realloc(hostsdown, strlen(hostname)+sizeof(hostsdown));
       hostsdown[hostdown_counter] = malloc(strlen(hostname)+1);
       strcpy(hostsdown[hostdown_counter], hostname);
       hostdown_counter++;
-      
+
     }
   }
 
@@ -252,28 +253,27 @@ void sort_data(char hostar[])
         break;
     }
 
-    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_warning) || strcasestr(errorss[i], status_critical) || strcasestr(errorss[i], status_unknown)) 
+    if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable) || strcasestr(errorss[i], status_warning) || strcasestr(errorss[i], status_critical) || strcasestr(errorss[i], status_unknown))
     {
       host_state = 0;
-      if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable)) 
+      if(strcasestr(errorss[i], status_hostdown) || strcasestr(errorss[i], status_hostunreachable))
       {
         type = 0;
       } else {
         type = 100;
       }
-      
+
       hostname = match_string(errorss[i], type);
       if(!strcmp(hostname, last_hostname))
       {
         continue;
       }
-      free(match);
 
       // Check for hostname in excludes.
       exclude_counter=0;
       while(exclude_counter < num_strings)
       {
-        if(!strcmp(hostname, excludes_save[exclude_counter]))
+        if(!strcmp(excludes_save[exclude_counter], hostname))
         {
           is_exclude = 1;
           break;
@@ -285,6 +285,7 @@ void sort_data(char hostar[])
       if(is_exclude == 1)
       {
         is_exclude = 0;
+        free(hostname);
         continue;
       }
 
@@ -293,7 +294,7 @@ void sort_data(char hostar[])
       {
         for(hostcounter=0; hostcounter < hostdown_counter; hostcounter++)
         {
-          if(strcasestr(hostname, hostsdown[hostcounter]))
+          if(strcasestr(hostsdown[hostcounter], hostname))
           {
             host_state = 2;
           }
@@ -322,7 +323,6 @@ void sort_data(char hostar[])
             {
               type = 1;
               service_name = match_string(errorss[service], type);
-              free(match);
               exclude_counter = 0;
               while(exclude_counter < num_strings)
               {
@@ -337,6 +337,7 @@ void sort_data(char hostar[])
               {
                 is_exclude = 0;
                 print_host = 0;
+                free(service_name);
                 continue;
               }
               if(print_host == 0)
@@ -359,7 +360,7 @@ void sort_data(char hostar[])
               }
 
               print_object(service_state_name, service_state, type);
-        
+
               attron(A_BOLD);
               printw(" %s\n", service_name);
               attroff(A_BOLD);
@@ -369,6 +370,7 @@ void sort_data(char hostar[])
         }
         print_host = 0;
       }
+      free(hostname);
     }
   }
 
@@ -381,16 +383,16 @@ void sort_data(char hostar[])
   }
   free(hostsdown);
 
-  return;
 }
 
-char * match_string(char line[], int type)
+char *match_string(char line[], int type)
 {
   regex_t regex;
   int typeregex;
   regmatch_t pmatch[8];
   size_t nmatch;
   char *pattern[200];
+  char *match;
   if(type == 0) {
     nmatch = 3;
     *pattern = "name='host' value='\\(.*\\)'/>";
@@ -407,7 +409,7 @@ char * match_string(char line[], int type)
       *pattern = "<postfield name='service' value='\\(.*\\)'/>"; /* Nagios >= 3.5 */
     }
   }
-  char *match = malloc(100);
+  match = malloc(100);
 
   typeregex = regcomp(&regex, *pattern, 0);
   if( typeregex ) {
@@ -457,9 +459,9 @@ int print_object(char *object, int state, int type)
     attroff(COLOR_PAIR(state));
     last_type = 1;
   } else {
-    
+
     //If a host is down, make sure it SHOWS!
-    if (state == 3) 
+    if (state == 3)
     {
       attroff(COLOR_PAIR(state));
       attron(COLOR_PAIR(6));
@@ -477,6 +479,5 @@ int print_object(char *object, int state, int type)
   }
   attroff(COLOR_PAIR(state));
   ++ypos;
-  free(match);
   return 0;
 }
