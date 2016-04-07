@@ -238,7 +238,7 @@ void sort_data(char hostar[])
       //Host is down, change the background color and add to hostsdown.
       bkgd(COLOR_PAIR(7));
 
-      hostsdown = realloc(hostsdown, strlen(hostname)+sizeof(hostsdown));
+      hostsdown = realloc(hostsdown, (strlen(hostname)+1)+hostdown_counter * sizeof(hostsdown));
       hostsdown[hostdown_counter] = malloc(strlen(hostname)+1);
       strcpy(hostsdown[hostdown_counter], hostname);
       hostdown_counter++;
