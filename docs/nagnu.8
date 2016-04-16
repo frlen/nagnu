@@ -1,0 +1,32 @@
+.Dd Apr 16, 2016
+.Dt NAGNU 8 nagnu
+.Os Nagnu 1.1.1
+.Th Nagnu 1.1.1 "nagnu"
+.Sh NAME
+.Nm nagnu
+.Nd Nagios dashboard
+.Sh SYNOPSIS
+.Nm
+.Op Fl c Ar file
+.Op Fl e Ar file
+.Op Fl s Ar seconds
+.Sh DESCRIPTION
+Nagnu is a dashboard for nagios 3.x or 4.x showing a 
+listing of all host and service problems.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl c
+Nagnu will look for the configuration file in
+.%T "./", 
+.%T "/etc"
+and 
+.%T "/usr/local/etc".
+If it is located elsewhere please specify with this flag.
+.It Fl e
+Excludes file. Newline separated list of service_descriptions or 
+hostnames that should be excluded from the output.
+.It Fl s
+Update interval in seconds. Default is 10.
+.El
+.Sh WWW
+http://github.com/frlen/nagnu
