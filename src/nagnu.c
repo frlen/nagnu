@@ -109,7 +109,11 @@ int get_data()
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
     curl_easy_setopt(curl, CURLOPT_URL, server_address);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    if(!strcmp(digest_auth, "yes")) {
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+    } else {
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    }
     curl_easy_setopt(curl, CURLOPT_USERPWD, user_pwd);
     curl_res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);

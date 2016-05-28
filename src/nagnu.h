@@ -13,6 +13,7 @@ extern char passwd[256];
 extern char server_address[256];
 extern char user_pwd[256];
 extern char cgi_version_new[256];
+extern char digest_auth[256];
 char **excludes_save;
 char **errorss;
 int num_strings;

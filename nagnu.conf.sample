@@ -9,3 +9,6 @@ password bar
 
 # For nagios < 3.5 change this to false
 newcgi true
+
+# Change to yes for digest authentication
+digest no

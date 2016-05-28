@@ -10,6 +10,7 @@ char passwd[256];
 char server_address[256];
 char user_pwd[256];
 char cgi_version_new[256];
+char digest_auth[256];
 extern char *cvalue;
 
 int get_conf()
@@ -64,8 +65,9 @@ int read_conf(char path[])
   const char *username = "username";
   const char *password = "password";
   const char *newcgi = "newcgi";
+  const char *digest = "digest";
   int i = 0;
-  int is_server = 0, is_username = 0, is_password = 0, is_newcgi = 0;
+  int is_server = 0, is_username = 0, is_password = 0, is_newcgi = 0, is_digest = 0;
 
   FILE *fp;
   fp = fopen(path, "r");
@@ -125,6 +127,13 @@ int read_conf(char path[])
           i = 0;
           is_newcgi = 0;
         }
+        if (is_digest == 1)
+        {
+          strcpy(digest_auth, store_input);
+          memset(store_input, '\0', sizeof(store_input));
+          i = 0;
+          is_digest = 0;
+        }
       }
     }
 
@@ -157,6 +166,13 @@ int read_conf(char path[])
       {
         i = 0;
         is_newcgi = 1;
+        memset(store_input, '\0', sizeof(store_input));
+        continue;
+      }
+      if (!strcmp(store_input,digest))
+      {
+        i = 0;
+        is_digest = 1;
         memset(store_input, '\0', sizeof(store_input));
         continue;
       }
